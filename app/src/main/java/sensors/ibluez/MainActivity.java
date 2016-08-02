@@ -55,10 +55,20 @@ public class MainActivity extends Activity {
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                // Handle the menu item
-                return true;
+                switch (item.getItemId()){
+                    case R.id.action_disconnect:
+                        sendMessage("Disconnecting...");
+                        return true;
+                    case R.id.action_settings:
+                        sendMessage("Opening settings...");
+                        return true;
+                }
+
+                return false;
             }
         });
+
+
 
 //        toolbar.inflateMenu(R.menu.toolbar_menu);
 
