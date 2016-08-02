@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">iBluez</string>
+    <string name="connecting_server">Connnecting to bluetooth server...\n</string>
 </resources>
