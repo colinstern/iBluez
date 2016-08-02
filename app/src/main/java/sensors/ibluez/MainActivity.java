@@ -11,6 +11,11 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,20 +38,36 @@ public class MainActivity extends Activity {
 
     private String mConnectedDeviceName;
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        final TextView textview = (TextView) findViewById(R.id.textview);
+        /**
+         * GUI setup
+         */
+        setContentView(R.layout.gui_main);
+
+        final TextView textview = (TextView) findViewById(R.id.textview_new);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        // Set an OnMenuItemClickListener to handle menu item clicks
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                // Handle the menu item
+                return true;
+            }
+        });
+
+//        toolbar.inflateMenu(R.menu.toolbar_menu);
+
+
 
         /**Get Bluetooth adapter
          *
          */
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
            textview.append("Device does not support bluetooth");
             return;
@@ -186,7 +207,7 @@ public class MainActivity extends Activity {
     };
 
     public void sendMessage(String message) {
-        final TextView textview = (TextView) findViewById(R.id.textview);
+        final TextView textview = (TextView) findViewById(R.id.textview_new);
         textview.append(message);
     }
 
