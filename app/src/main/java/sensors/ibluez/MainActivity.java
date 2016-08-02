@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
@@ -70,7 +71,7 @@ public class MainActivity extends Activity {
             for (BluetoothDevice device : pairedDevices) {
                 imFeelingLuckyDevice = device;
                 if (imFeelingLuckyDevice == null) {
-                    textview.append("chosen device is null\n");
+                    sendMessage("chosen device is null\n");
                 }
                 else {
                     textview.append("Chosen device is " + imFeelingLuckyDevice.getName() + "\n");
@@ -138,6 +139,12 @@ public class MainActivity extends Activity {
                         String readMessage = new String(readBuf, 0, msg.arg1);
                         textview.append("\n" + mConnectedDeviceName + ":  " + readMessage);
                         break;
+                    case Constants.MESSAGE_ERROR:
+                        byte[] errorBuf = (byte[]) msg.obj;
+                        // construct a string from the valid bytes in the buffer
+                        String errorMessage = new String(errorBuf, 0, msg.arg1);
+                        textview.append("\n" + mConnectedDeviceName + ":  " + errorMessage );
+                        break;
                     case Constants.MESSAGE_DEVICE_NAME:
                         // save the connected device's name
                         mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
@@ -159,7 +166,7 @@ public class MainActivity extends Activity {
          * Start ConnectThread
          */
         mmConnectThread = new ConnectThread(imFeelingLuckyDevice, mHandler);
-        textview.append("Starting ConnectThread\n");
+        sendMessage("Starting ConnectThread\n");
         mmConnectThread.start();
     }
 
@@ -173,11 +180,15 @@ public class MainActivity extends Activity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // Add the name and address to an array adapter to show in a ListView
 //                    mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                TextView textview = (TextView) findViewById(R.id.textview);
-                textview.append("Discovered " + device.getName() + "\n" + device.getAddress());
+                sendMessage("Discovered " + device.getName() + "\n" + device.getAddress());
             }
         }
     };
+
+    public void sendMessage(String message) {
+        final TextView textview = (TextView) findViewById(R.id.textview);
+        textview.append(message);
+    }
 
     @Override
     protected void onDestroy() {

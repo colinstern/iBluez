@@ -50,7 +50,7 @@ class ConnectThread extends Thread {
             tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
             sendMessageToMainActivity("Opening socket");
         } catch (IOException e) {
-            sendMessageToMainActivity("Could not get a socket\n");
+            sendErrorMessageToMainActivity("Could not get a socket\n");
         }
         mmSocket = tmp;
     }
@@ -64,7 +64,7 @@ class ConnectThread extends Thread {
             // until it succeeds or throws an exception
             mmSocket.connect();
         } catch (IOException connectException) {
-            sendMessageToMainActivity("Error: " + connectException.toString());
+            sendErrorMessageToMainActivity("Error: " + connectException.toString());
             // Unable to connect; close the socket and get out
             sendMessageToMainActivity("Unable to connect");
             try {
@@ -76,7 +76,7 @@ class ConnectThread extends Thread {
                 sendMessageToMainActivity("Reconnecting...");
                 sendMessageToMainActivity("Reconnection successful");
             } catch (IOException closeException) {
-                sendMessageToMainActivity("Unable to close socket");
+                sendErrorMessageToMainActivity("Unable to close socket");
                 return;
             }
         }
@@ -107,6 +107,17 @@ class ConnectThread extends Thread {
         buffer = message.getBytes();
         // Send the obtained bytes to the UI activity
         mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
+                .sendToTarget();
+    }
+
+    public void sendErrorMessageToMainActivity(String message) {
+        byte[] buffer;  // buffer store for the stream
+        int bytes;
+        // Read from the InputStream
+        bytes = message.getBytes().length;
+        buffer = message.getBytes();
+        // Send the obtained bytes to the UI activity
+        mHandler.obtainMessage(Constants.MESSAGE_ERROR, bytes, -1, buffer)
                 .sendToTarget();
     }
 }
