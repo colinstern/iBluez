@@ -17,8 +17,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewAnimator;
 
 import java.util.Set;
 
@@ -37,6 +39,8 @@ public class MainActivity extends Activity {
     private BluetoothDevice imFeelingLuckyDevice; //total guess - is the first device the microcontroller?
 
     private String mConnectedDeviceName;
+
+    private boolean mDisconnectShown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +61,12 @@ public class MainActivity extends Activity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()){
                     case R.id.action_disconnect:
-                        sendMessage("Disconnecting...");
+                        sendMessage("\nDisconnecting... ");
+                        mmConnectThread.cancel();
+                        sendMessage("Disconnected.\n");
                         return true;
                     case R.id.action_settings:
-                        sendMessage("Opening settings...");
+                        sendMessage("Opening settings...\n");
                         return true;
                 }
 
@@ -70,7 +76,7 @@ public class MainActivity extends Activity {
 
 
 
-//        toolbar.inflateMenu(R.menu.toolbar_menu);
+        toolbar.inflateMenu(R.menu.toolbar_menu);
 
 
 
@@ -113,6 +119,8 @@ public class MainActivity extends Activity {
             }
         }
 
+
+
         /**Discover devices
          *
          */
@@ -130,9 +138,9 @@ public class MainActivity extends Activity {
         Intent discoverableIntent = new
                 Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-        startActivity(discoverableIntent);
+//        startActivity(discoverableIntent);
 
-        mBluetoothAdapter.startDiscovery();
+//        mBluetoothAdapter.startDiscovery(); TODO renable for bluetooth discovery
 
 
 
@@ -205,6 +213,7 @@ public class MainActivity extends Activity {
     final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+
             // When discovery finds a device
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 // Get the BluetoothDevice object from the Intent
@@ -226,4 +235,7 @@ public class MainActivity extends Activity {
         super.onDestroy();
         this.unregisterReceiver(mReceiver);
     }
+
+
+
 }

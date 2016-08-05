@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.os.Message;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ class ConnectThread extends Thread {
 
     public Handler mHandler;
 
-    boolean connectionSuccesful = false;
+    public FallbackBluetoothSocket fallbackSocket;
 
     public ConnectThread(BluetoothDevice device, Handler handler) {
         // Use a temporary object that is later assigned to mmSocket,
@@ -64,28 +66,27 @@ class ConnectThread extends Thread {
             // until it succeeds or throws an exception
             mmSocket.connect();
         } catch (IOException connectException) {
-            sendErrorMessageToMainActivity("Error: " + connectException.toString());
+//            sendErrorMessageToMainActivity("Error: " + connectException.toString());
             // Unable to connect; close the socket and get out
-            sendMessageToMainActivity("Unable to connect");
+//            sendMessageToMainActivity("Unable to connect");
+
             try {
                 mmSocket.close();
                 sendMessageToMainActivity("Closing socket");
-                FallbackBluetoothSocket fallbackSocket = new FallbackBluetoothSocket(mmSocket);
+                fallbackSocket = new FallbackBluetoothSocket(mmSocket);
+                sendMessageToMainActivity("Opening new socket...");
                 fallbackSocket.connect();
-                connectionSuccesful = true;
-                sendMessageToMainActivity("Reconnecting...");
-                sendMessageToMainActivity("Reconnection successful");
+                sendMessageToMainActivity("Connection successful");
+                // Do work to manage the connection (in a separate thread)
+                manageConnectedSocket(fallbackSocket);
             } catch (IOException closeException) {
-                sendErrorMessageToMainActivity("Unable to close socket");
+                sendErrorMessageToMainActivity("Unable to open socket: " + closeException.toString());
                 return;
             }
         }
-
-        // Do work to manage the connection (in a separate thread)
-        manageConnectedSocket(mmSocket);
     }
 
-    public void manageConnectedSocket(BluetoothSocket mmSocket)
+    public void manageConnectedSocket(FallbackBluetoothSocket mmSocket)
     {
         mConnectedThread = new ConnectedThread(mmSocket, mHandler);
         sendMessageToMainActivity("Starting ConnectedThread...");
@@ -96,6 +97,7 @@ class ConnectThread extends Thread {
     public void cancel() {
         try {
             mmSocket.close();
+            fallbackSocket.close();
         } catch (IOException e) { }
     }
 
@@ -139,7 +141,21 @@ class ConnectThread extends Thread {
         }
     }
 
+     public InputStream getInputStream() throws IOException {
+         return fallbackSocket.getInputStream();
+     }
+
+     public OutputStream getOutputStream() throws IOException {
+         return fallbackSocket.getOutputStream();
+     }
+
+
      public void connect() throws IOException {
          fallbackSocket.connect();
+     }
+
+
+     public void close() throws IOException {
+         fallbackSocket.close();
      }
 }

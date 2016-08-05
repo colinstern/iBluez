@@ -5,13 +5,11 @@
 
     <item android:id="@+id/action_disconnect"
         android:title="Disconnect"
-        app:showAsAction="always"
-        android:layout_gravity="left"/>
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_settings"
         android:title="Settings"
-        app:showAsAction="always"
-        android:layout_gravity="right"/>
+        app:showAsAction="always"/>
 
 </menu>

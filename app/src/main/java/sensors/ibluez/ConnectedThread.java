@@ -6,9 +6,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,14 +20,14 @@ import java.io.OutputStream;
  * Created by cost on 7/31/16.
  */
 class ConnectedThread extends Thread {
-    private final BluetoothSocket mmSocket;
+    private final FallbackBluetoothSocket mmSocket;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
     private final Handler mHandler;
     FileOutputStream outputStream;
     Context context;
 
-    public ConnectedThread(BluetoothSocket socket, Handler handler) {
+    public ConnectedThread(FallbackBluetoothSocket socket, Handler handler) {
         mHandler = handler;
         mmSocket = socket;
         InputStream tmpIn = null;
@@ -47,14 +50,18 @@ class ConnectedThread extends Thread {
         sendMessageToMainActivity("Running ConnectedThread");
         byte[] buffer = new byte[1024];  // buffer store for the stream
         int bytes; // bytes returned from read()
+        if (!isExternalStorageWritable()) {
+            sendMessageToMainActivity("External storage is not writable!");
+        }
         File storageDir = getStorageDir();
+
         String filename = "data_1";
-        File file = new File(storageDir, filename);
-        sendMessageToMainActivity("Created new file");
+        File file = new File(storageDir, filename); //changed from storageDir
+        sendMessageToMainActivity("Created new file: " + filename);
 
         try {
             try {
-                outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream = new FileOutputStream(file);
             } catch (FileNotFoundException e) {
 
             }
@@ -72,13 +79,42 @@ class ConnectedThread extends Thread {
                     outputStream.write(buffer);
                     sendMessageToMainActivity("Read 1024 bytes");
                 } catch (IOException e) {
-                    sendMessageToMainActivity("Connection terminated: " + e.toString());
+//                sendMessageToMainActivity("Unable to read from inputStream!");
+                sendMessageToMainActivity("Connection terminated.");
                     break;
                 }
             }
             outputStream.close();
-        } catch (Exception e) {
-            sendMessageToMainActivity("IO error!" + e.toString());
+            try {
+                File myDir = new File(storageDir.getAbsolutePath());
+                String s = "";
+
+//                FileWriter fw = new FileWriter(myDir + "/Test.txt");
+//                fw.write("Hello World");
+//                fw.close();
+
+                BufferedReader br = new BufferedReader(new FileReader(myDir + "/" + filename));
+                sendMessageToMainActivity("Reading data...");
+
+                while (true) {
+                    try {
+                        s = br.readLine();
+                        sendMessageToMainActivity(s);
+                    } catch (Exception e){
+                        sendMessageToMainActivity("Finished reading data.");
+                        break;
+                    }
+                }
+                // Set TextView text here using tv.setText(s);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+//                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            sendMessageToMainActivity("IO error! " + e.toString());
+            e.getStackTrace();
         }
     }
 
