@@ -17,25 +17,26 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.84">
+        android:layout_weight="0.84"
+        android:id="@+id/scrollview">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="GUI8 Success!\n"
         android:id="@+id/textview_new"
-        android:background="@drawable/border"/>
+        android:background="@drawable/border" />
     </ScrollView>
 
     <android.support.v7.widget.Toolbar
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="45dp"
         android:background="?attr/colorAccent"
         android:layout_weight="0.04"
         android:layout_gravity="bottom"
         android:id="@+id/toolbar">
 
-        <Button
+        <!--<Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
@@ -61,7 +62,7 @@
             android:layout_alignParentRight="true"
             android:src="@drawable/gear"
             android:adjustViewBounds="true"
-            android:scaleType="centerInside"/>
+            android:scaleType="centerInside"/>-->
 
     </android.support.v7.widget.Toolbar>
 </LinearLayout>

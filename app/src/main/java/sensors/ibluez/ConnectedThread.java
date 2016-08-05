@@ -54,9 +54,16 @@ class ConnectedThread extends Thread {
             sendMessageToMainActivity("External storage is not writable!");
         }
         File storageDir = getStorageDir();
+        String filenamePrefix = "data_";
+        int i = 1;
+        File file = makeNewFile(storageDir, filenamePrefix + i);
 
-        String filename = "data_1";
-        File file = new File(storageDir, filename); //changed from storageDir
+        /*Increment filename suffix until an unused filename is found*/
+        /*while (file.exists()) {
+            file = makeNewFile(storageDir, filenamePrefix + i);
+            i++;
+        }*/
+        String filename = filenamePrefix + i;
         sendMessageToMainActivity("Created new file: " + filename);
 
         try {
@@ -85,36 +92,55 @@ class ConnectedThread extends Thread {
                 }
             }
             outputStream.close();
-            try {
-                File myDir = new File(storageDir.getAbsolutePath());
-                String s = "";
+            printSavedData(storageDir, filename);
+        } catch (IOException e) {
+            sendMessageToMainActivity("IO error! " + e.toString());
+            e.getStackTrace();
+        }
+    }
+
+    /**
+     * Creates a new file.
+     * @param dir Directory to create file in.
+     * @param filename Name of file.
+     * @return
+     */
+    public File makeNewFile(File dir, String filename) {
+        return new File(dir, filename);
+    }
+
+    /**
+     * Read and print data from a file.
+     * @param dir The directory of the file.
+     * @param filename The name of the file to open.
+     */
+    public void printSavedData(File dir, String filename) {
+        try {
+            File myDir = new File(dir.getAbsolutePath());
+            String s = "";
 
 //                FileWriter fw = new FileWriter(myDir + "/Test.txt");
 //                fw.write("Hello World");
 //                fw.close();
 
-                BufferedReader br = new BufferedReader(new FileReader(myDir + "/" + filename));
-                sendMessageToMainActivity("Reading data...");
+            BufferedReader br = new BufferedReader(new FileReader(myDir + "/" + filename));
+            sendMessageToMainActivity("Reading data...");
 
-                while (true) {
-                    try {
-                        s = br.readLine();
-                        sendMessageToMainActivity(s);
-                    } catch (Exception e){
-                        sendMessageToMainActivity("Finished reading data.");
-                        break;
-                    }
+            while (true) {
+                try {
+                    s = br.readLine();
+                    sendMessageToMainActivity(s);
+                } catch (Exception e){
+                    sendMessageToMainActivity("Finished reading data.");
+                    break;
                 }
-                // Set TextView text here using tv.setText(s);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-//                e.printStackTrace();
             }
+            // Set TextView text here using tv.setText(s);
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
-            sendMessageToMainActivity("IO error! " + e.toString());
-            e.getStackTrace();
+//                e.printStackTrace();
         }
     }
 

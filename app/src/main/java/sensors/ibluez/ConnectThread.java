@@ -80,7 +80,7 @@ class ConnectThread extends Thread {
                 // Do work to manage the connection (in a separate thread)
                 manageConnectedSocket(fallbackSocket);
             } catch (IOException closeException) {
-                sendErrorMessageToMainActivity("Unable to open socket: " + closeException.toString());
+                sendErrorMessageToMainActivity("Unable to open socket: Is iShadow on?");
                 return;
             }
         }

@@ -12,12 +12,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
@@ -52,6 +55,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.gui_main);
 
         final TextView textview = (TextView) findViewById(R.id.textview_new);
+        textview.setMovementMethod(new ScrollingMovementMethod());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -66,14 +70,18 @@ public class MainActivity extends Activity {
                         sendMessage("Disconnected.\n");
                         return true;
                     case R.id.action_settings:
-                        sendMessage("Opening settings...\n");
+                        sendMessage("\nOpening settings...\n");
                         return true;
+                    case R.id.action_connect:
+                        sendMessage("Opening Connect menu...\n");
+                        // Launch the DeviceListActivity to see devices and do scan
+/*                        Intent serverIntent = new Intent(getActivity(), DeviceListActivity.class);
+                        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);*/
                 }
 
                 return false;
             }
         });
-
 
 
         toolbar.inflateMenu(R.menu.toolbar_menu);
@@ -177,6 +185,7 @@ public class MainActivity extends Activity {
                         // construct a string from the valid bytes in the buffer
                         String readMessage = new String(readBuf, 0, msg.arg1);
                         textview.append("\n" + mConnectedDeviceName + ":  " + readMessage);
+                        scrollToBottom();
                         break;
                     case Constants.MESSAGE_ERROR:
                         byte[] errorBuf = (byte[]) msg.obj;
@@ -237,5 +246,21 @@ public class MainActivity extends Activity {
     }
 
 
+    /**
+     * Scrolls to the bottom of the TextView.
+     */
+    private void scrollToBottom()
+    {
+
+        final TextView mTextStatus = (TextView) findViewById(R.id.textview_new);
+        final ScrollView mScrollView = (ScrollView) findViewById(R.id.scrollview);
+        mScrollView.post(new Runnable()
+        {
+            public void run()
+            {
+                mScrollView.smoothScrollTo(0, mTextStatus.getBottom());
+            }
+        });
+    }
 
 }

@@ -8,7 +8,13 @@
         app:showAsAction="always"/>
 
     <item
+        android:id="@+id/action_connect"
+        android:title="Connect"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/action_settings"
+        android:icon="@drawable/gear"
         android:title="Settings"
         app:showAsAction="always"/>
 
