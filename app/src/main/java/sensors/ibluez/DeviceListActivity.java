@@ -19,6 +19,7 @@ import android.widget.TextView;
 import java.util.Set;
 
 /**
+ * This class creates a popup that lets the user choose a device to connect to.
  * Created by cost on 8/8/16.
  */
 public class DeviceListActivity extends Activity {

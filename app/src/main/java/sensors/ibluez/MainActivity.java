@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        // Set an OnMenuItemClickListener to handle menu item clicks
+        /* Set an OnMenuItemClickListener to handle menu item clicks */
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -90,11 +90,11 @@ public class MainActivity extends Activity {
                             sendMessage("Opening Connect menu...\n");
                             openContextMenuOnce = !openContextMenuOnce;
                             // Launch the DeviceListActivity to see devices and do scan
-                            Intent serverIntent = new Intent(MyApplication.getAppContext(), DeviceListActivity.class); //TODO figure out this constructor and remove getAppContext if possible
+                            Intent serverIntent = new Intent(MyApplication.getAppContext(), DeviceListActivity.class);
                             startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
                         }
                         else {
-                            sendMessage("Cannot connect to more than one device\n");
+                            sendMessage("Cannot connect to more than one device. Try restarting the app.\n");
                         }
                         return true;
                 }
@@ -102,10 +102,7 @@ public class MainActivity extends Activity {
             }
         });
 
-
         toolbar.inflateMenu(R.menu.toolbar_menu);
-
-
 
         /**Get Bluetooth adapter
          *
@@ -123,51 +120,16 @@ public class MainActivity extends Activity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-        /**Query paired devices
-         *
-         *//* TODO commented because this is redundant
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-// If there are paired devices
-//        mArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
-        if (pairedDevices.size() > 0) {
-            // Loop through paired devices
-            for (BluetoothDevice device : pairedDevices) {
-                imFeelingLuckyDevice = device;
-                if (imFeelingLuckyDevice == null) {
-                    sendMessage("chosen device is null\n");
-                }
-                else {
-                    textview.append("Chosen device is " + imFeelingLuckyDevice.getName() + "\n");
-                }
-                // Add the name and address to an array adapter to show in a ListView
-//                mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                textview.append("Paired with " + device.getName() + "\n" + device.getAddress() + "\n");
-            }
-        */
-
-
 
         /**Discover devices
-         *
+         * Register the BroadcastReceiver
          */
-// Register the BroadcastReceiver
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
 
         // Register for broadcasts when discovery has finished
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         this.registerReceiver(mReceiver, filter);
-
-
-//        connect(imFeelingLuckyDevice, mHandler);
-        /* Start ConnectThread */
-//        connectTemp(imFeelingLuckyDevice); //TODO remove this method
-    }
-
-    public void connectTemp(BluetoothDevice device) {
-        mmConnectThread = new ConnectThread(device, mHandler);
-        sendMessage("Starting ConnectThread\n");
-        mmConnectThread.start();
     }
 
     /**
@@ -239,10 +201,13 @@ public class MainActivity extends Activity {
         // Attempt to connect to the device
 
         mmConnectThread = new ConnectThread(device, mHandler);
-        sendMessage("Starting ConnectThread\n");
+//        sendMessage("Starting ConnectThread\n");
         mmConnectThread.start();
     }
 
+    /*
+    Handles the response of DeviceListActivity
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE_SECURE:
@@ -285,6 +250,10 @@ public class MainActivity extends Activity {
         }
     };
 
+    /**
+     * Write a message on the TextView.
+     * @param message
+     */
     public void sendMessage(String message) {
         final TextView textview = (TextView) findViewById(R.id.textview_new);
         textview.append(message);

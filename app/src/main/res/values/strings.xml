@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">iBluez</string>
     <string name="connecting_server">Connnecting to bluetooth server...\n</string>
-    <string name="startup_message">Greetings!\n I will try to connect to iShadow and download video data off of it. Make sure it is running the btserver script.\n</string>
+    <string name="startup_message">Greetings!\n I will try to connect to iShadow and download video data off of it. Please make sure it is running the btserver script. Press connect when ready to select a device.\n</string>
 
 
     <!--From BluetoothChat-->

@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
+ * This class handles the connection with iShadow and receives and saves data.
  * Created by cost on 7/31/16.
  */
 class ConnectedThread extends Thread {
@@ -47,7 +48,7 @@ class ConnectedThread extends Thread {
     }
 
     public void run() {
-        sendMessageToMainActivity("Running ConnectedThread");
+//        sendMessageToMainActivity("Running ConnectedThread");
         byte[] buffer = new byte[1024];  // buffer store for the stream
         int bytes; // bytes returned from read()
         if (!isExternalStorageWritable()) {
@@ -131,7 +132,7 @@ class ConnectedThread extends Thread {
                     s = br.readLine();
                     sendMessageToMainActivity(s);
                 } catch (Exception e){
-                    sendMessageToMainActivity("Finished reading data.");
+                    sendMessageToMainActivity("Finished reading data.\n");
                     break;
                 }
             }

@@ -6,10 +6,9 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="47dp"
         android:id="@+id/imageView"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.12"
         android:src="@drawable/header_unravel_large"
         android:adjustViewBounds="true"
         android:scaleType="centerInside"/>
@@ -17,12 +16,12 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.84"
-        android:id="@+id/scrollview">
+        android:id="@+id/scrollview"
+        android:layout_weight="1">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="GUI8 Success!\n"
+        android:text="@string/startup_message"
         android:id="@+id/textview_new"
         android:background="@drawable/border" />
     </ScrollView>
@@ -32,37 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="45dp"
         android:background="?attr/colorAccent"
-        android:layout_weight="0.04"
         android:layout_gravity="bottom"
         android:id="@+id/toolbar">
-
-        <!--<Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:id="@+id/disconnect"
-            android:textSize="16sp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:textColor="#FFF"
-            android:text="Disconnect" />
-
-        <ImageButton
-            android:layout_width="60dp"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="0dp"
-            android:layout_gravity="right"
-            android:id="@+id/settings"
-            android:textSize="16sp"
-            android:background="@null"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/gear"
-            android:adjustViewBounds="true"
-            android:scaleType="centerInside"/>-->
-
     </android.support.v7.widget.Toolbar>
 </LinearLayout>

@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
+ * This class opens a connection with the device that is passed in.
  * Created by cost on 7/31/16.
  */
 class ConnectThread extends Thread {
@@ -50,7 +51,7 @@ class ConnectThread extends Thread {
         try {
             // MY_UUID is the app's UUID string, also used by the server code
             tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-            sendMessageToMainActivity("Opening socket");
+//            sendMessageToMainActivity("Opening socket");
         } catch (IOException e) {
             sendErrorMessageToMainActivity("Could not get a socket\n");
         }
@@ -72,11 +73,11 @@ class ConnectThread extends Thread {
 
             try {
                 mmSocket.close();
-                sendMessageToMainActivity("Closing socket");
+//                sendMessageToMainActivity("Closing socket");
                 fallbackSocket = new FallbackBluetoothSocket(mmSocket);
                 sendMessageToMainActivity("Opening new socket...");
                 fallbackSocket.connect();
-                sendMessageToMainActivity("Connection successful");
+                sendMessageToMainActivity("Connection successful!");
                 // Do work to manage the connection (in a separate thread)
                 manageConnectedSocket(fallbackSocket);
             } catch (IOException closeException) {
@@ -89,7 +90,7 @@ class ConnectThread extends Thread {
     public void manageConnectedSocket(FallbackBluetoothSocket mmSocket)
     {
         mConnectedThread = new ConnectedThread(mmSocket, mHandler);
-        sendMessageToMainActivity("Starting ConnectedThread...");
+//        sendMessageToMainActivity("Starting ConnectedThread...");
         mConnectedThread.start();
     }
 
