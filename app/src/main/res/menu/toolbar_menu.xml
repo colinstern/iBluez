@@ -13,7 +13,7 @@
         app:showAsAction="always"/>
 
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_discoverable"
         android:icon="@drawable/gear"
         android:title="Settings"
         app:showAsAction="always"/>

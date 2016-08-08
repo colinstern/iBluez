@@ -45,6 +45,8 @@ public class MainActivity extends Activity {
 
     private boolean mDisconnectShown;
 
+    private BluetoothAdapter mBluetoothAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,8 +71,9 @@ public class MainActivity extends Activity {
                         mmConnectThread.cancel();
                         sendMessage("Disconnected.\n");
                         return true;
-                    case R.id.action_settings:
-                        sendMessage("\nOpening settings...\n");
+                    case R.id.action_discoverable:
+                        ensureDiscoverable();
+                        sendMessage("\nNow discoverable\n");
                         return true;
                     case R.id.action_connect:
                         sendMessage("Opening Connect menu...\n");
@@ -91,7 +94,7 @@ public class MainActivity extends Activity {
         /**Get Bluetooth adapter
          *
          */
-        final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
            textview.append("Device does not support bluetooth");
             return;
@@ -140,15 +143,6 @@ public class MainActivity extends Activity {
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         this.registerReceiver(mReceiver, filter);
 
-        /**
-         * Enable discoverability
-         */
-        Intent discoverableIntent = new
-                Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-//        startActivity(discoverableIntent);
-
-//        mBluetoothAdapter.startDiscovery(); TODO renable for bluetooth discovery
 
 
 
@@ -237,6 +231,7 @@ public class MainActivity extends Activity {
     public void sendMessage(String message) {
         final TextView textview = (TextView) findViewById(R.id.textview_new);
         textview.append(message);
+        scrollToBottom();
     }
 
     @Override
@@ -261,6 +256,18 @@ public class MainActivity extends Activity {
                 mScrollView.smoothScrollTo(0, mTextStatus.getBottom());
             }
         });
+    }
+
+    /**
+     * Makes this device discoverable.
+     */
+    private void ensureDiscoverable() {
+        if (mBluetoothAdapter.getScanMode() !=
+                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+        }
     }
 
 }
