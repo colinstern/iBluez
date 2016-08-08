@@ -15,6 +15,10 @@ public class MyApplication extends Application {
         MyApplication.context = getApplicationContext();
     }
 
+    public static void setContext(Context mContext) {
+        context = mContext;
+    }
+
     public static Context getAppContext() {
         return MyApplication.context;
     }

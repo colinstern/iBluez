@@ -28,10 +28,6 @@ import android.widget.ViewAnimator;
 import java.util.Set;
 
 public class MainActivity extends Activity {
-
-    // Intent request codes
-    private static final int REQUEST_ENABLE_BT = 3;
-
     /**
      * Array adapter for the conversation thread
      */
@@ -47,9 +43,18 @@ public class MainActivity extends Activity {
 
     private BluetoothAdapter mBluetoothAdapter;
 
+    private static boolean openContextMenuOnce = true;
+
+    // Intent request codes
+    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+    private static final int REQUEST_ENABLE_BT = 3;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        MyApplication.setContext(this);
 
         /**
          * GUI setup
@@ -67,21 +72,32 @@ public class MainActivity extends Activity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()){
                     case R.id.action_disconnect:
-                        sendMessage("\nDisconnecting... ");
-                        mmConnectThread.cancel();
+                        sendMessage("Disconnecting...\n");
+                        if (mmConnectThread != null) {
+                            mmConnectThread.cancel();
+                        }
+                        else {
+                            sendMessage("No connection to close!\n");
+                        }
                         sendMessage("Disconnected.\n");
                         return true;
                     case R.id.action_discoverable:
                         ensureDiscoverable();
-                        sendMessage("\nNow discoverable\n");
+                        sendMessage("Now discoverable\n");
                         return true;
                     case R.id.action_connect:
-                        sendMessage("Opening Connect menu...\n");
-                        // Launch the DeviceListActivity to see devices and do scan
-/*                        Intent serverIntent = new Intent(getActivity(), DeviceListActivity.class);
-                        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);*/
+                        if (openContextMenuOnce) {
+                            sendMessage("Opening Connect menu...\n");
+                            openContextMenuOnce = !openContextMenuOnce;
+                            // Launch the DeviceListActivity to see devices and do scan
+                            Intent serverIntent = new Intent(MyApplication.getAppContext(), DeviceListActivity.class); //TODO figure out this constructor and remove getAppContext if possible
+                            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
+                        }
+                        else {
+                            sendMessage("Cannot connect to more than one device\n");
+                        }
+                        return true;
                 }
-
                 return false;
             }
         });
@@ -107,10 +123,9 @@ public class MainActivity extends Activity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-
         /**Query paired devices
          *
-         */
+         *//* TODO commented because this is redundant
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 // If there are paired devices
 //        mArrayAdapter = new ArrayAdapter<String>(this, R.layout.message);
@@ -128,7 +143,7 @@ public class MainActivity extends Activity {
 //                mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
                 textview.append("Paired with " + device.getName() + "\n" + device.getAddress() + "\n");
             }
-        }
+        */
 
 
 
@@ -144,72 +159,114 @@ public class MainActivity extends Activity {
         this.registerReceiver(mReceiver, filter);
 
 
+//        connect(imFeelingLuckyDevice, mHandler);
+        /* Start ConnectThread */
+//        connectTemp(imFeelingLuckyDevice); //TODO remove this method
+    }
 
-
-
-/**
- * The Handler that gets information back from the BluetoothService
- */
-         final Handler mHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case Constants.MESSAGE_STATE_CHANGE:
-                        switch (msg.arg1) {
-                            case Constants.STATE_CONNECTED:
-//                            setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                                break;
-                            case Constants.STATE_CONNECTING:
-//                            setStatus(R.string.title_connecting);
-                                break;
-                            case Constants.STATE_LISTEN:
-                            case Constants.STATE_NONE:
-//                            setStatus(R.string.title_not_connected);
-                                break;
-                        }
-                        break;
-                    case Constants.MESSAGE_WRITE:
-                        byte[] writeBuf = (byte[]) msg.obj;
-                        // construct a string from the buffer
-                        String writeMessage = new String(writeBuf);
-                        textview.append("Me:  " + writeMessage);
-                        break;
-                    case Constants.MESSAGE_READ:
-                        byte[] readBuf = (byte[]) msg.obj;
-                        // construct a string from the valid bytes in the buffer
-                        String readMessage = new String(readBuf, 0, msg.arg1);
-                        textview.append("\n" + mConnectedDeviceName + ":  " + readMessage);
-                        scrollToBottom();
-                        break;
-                    case Constants.MESSAGE_ERROR:
-                        byte[] errorBuf = (byte[]) msg.obj;
-                        // construct a string from the valid bytes in the buffer
-                        String errorMessage = new String(errorBuf, 0, msg.arg1);
-                        textview.append("\n" + mConnectedDeviceName + ":  " + errorMessage );
-                        break;
-                    case Constants.MESSAGE_DEVICE_NAME:
-                        // save the connected device's name
-                        mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
-                            textview.append("Connected to "
-                                    + mConnectedDeviceName.toString());
-                            Toast.makeText(MainActivity.this, "Connected to "
-                                    + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                        break;
-                    case Constants.MESSAGE_TOAST:
-                            Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST),
-                                    Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
-        };
-
-
-        /**
-         * Start ConnectThread
-         */
-        mmConnectThread = new ConnectThread(imFeelingLuckyDevice, mHandler);
+    public void connectTemp(BluetoothDevice device) {
+        mmConnectThread = new ConnectThread(device, mHandler);
         sendMessage("Starting ConnectThread\n");
         mmConnectThread.start();
+    }
+
+    /**
+     * The Handler that gets information back from the BluetoothService
+     */
+    final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            final TextView textview = (TextView) findViewById(R.id.textview_new);
+            switch (msg.what) {
+                case Constants.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1) {
+                        case Constants.STATE_CONNECTED:
+//                            setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            break;
+                        case Constants.STATE_CONNECTING:
+//                            setStatus(R.string.title_connecting);
+                            break;
+                        case Constants.STATE_LISTEN:
+                        case Constants.STATE_NONE:
+//                            setStatus(R.string.title_not_connected);
+                            break;
+                    }
+                    break;
+                case Constants.MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    // construct a string from the buffer
+                    String writeMessage = new String(writeBuf);
+                    textview.append("Me:  " + writeMessage);
+                    break;
+                case Constants.MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    // construct a string from the valid bytes in the buffer
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    textview.append("\n" + mConnectedDeviceName + ":  " + readMessage);
+                    scrollToBottom();
+                    break;
+                case Constants.MESSAGE_ERROR:
+                    byte[] errorBuf = (byte[]) msg.obj;
+                    // construct a string from the valid bytes in the buffer
+                    String errorMessage = new String(errorBuf, 0, msg.arg1);
+                    textview.append("\n" + mConnectedDeviceName + ":  " + errorMessage );
+                    break;
+                case Constants.MESSAGE_DEVICE_NAME:
+                    // save the connected device's name
+                    mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
+                    textview.append("Connected to "
+                            + mConnectedDeviceName.toString());
+                    Toast.makeText(MainActivity.this, "Connected to "
+                            + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.MESSAGE_TOAST:
+                    Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
+
+    /**
+     * Start ConnectThread
+     */
+    public void connect(Intent data) {
+        // Get the device MAC address
+        String address = data.getExtras()
+                .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        // Get the BluetoothDevice object
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        // Attempt to connect to the device
+
+        mmConnectThread = new ConnectThread(device, mHandler);
+        sendMessage("Starting ConnectThread\n");
+        mmConnectThread.start();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CONNECT_DEVICE_SECURE:
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    connect(data);
+                }
+                break;
+            case REQUEST_CONNECT_DEVICE_INSECURE:
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    connect(data);
+                }
+                break;
+            case REQUEST_ENABLE_BT:
+                // When the request to enable Bluetooth returns
+                if (resultCode == Activity.RESULT_OK) {
+                    // Bluetooth is now enabled, so set up a chat session
+                } else {
+                    // User did not enable Bluetooth or an error occurred
+                    Toast.makeText(this,"Bluetooth not enabled, leaving...",
+                            Toast.LENGTH_SHORT).show();
+                }
+        }
     }
 
     // Create a BroadcastReceiver for ACTION_FOUND

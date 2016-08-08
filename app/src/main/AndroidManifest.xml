@@ -18,9 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <application android:name="com.xyz.MyApplication">
 
+        <application android:name="com.xyz.MyApplication">
         </application>
+
+        <activity android:name=".DeviceListActivity">
+        </activity>
+
     </application>
 
 
