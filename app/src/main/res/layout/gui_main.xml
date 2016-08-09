@@ -6,10 +6,10 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="47dp"
+        android:layout_height="50dp"
         android:id="@+id/imageView"
         android:layout_gravity="center_horizontal"
-        android:src="@drawable/header_unravel_large"
+        android:src="@drawable/header_mascara"
         android:adjustViewBounds="true"
         android:scaleType="centerInside"/>
 

@@ -56,14 +56,14 @@ class ConnectedThread extends Thread {
         }
         File storageDir = getStorageDir();
         String filenamePrefix = "data_";
-        int i = 1;
+        int i = 0;
         File file = makeNewFile(storageDir, filenamePrefix + i);
 
         /*Increment filename suffix until an unused filename is found*/
-        /*while (file.exists()) {
-            file = makeNewFile(storageDir, filenamePrefix + i);
+        while (file.exists()) {
             i++;
-        }*/
+            file = makeNewFile(storageDir, filenamePrefix + i);
+        }
         String filename = filenamePrefix + i;
         sendMessageToMainActivity("Created new file: " + filename);
 
@@ -125,7 +125,7 @@ class ConnectedThread extends Thread {
 //                fw.close();
 
             BufferedReader br = new BufferedReader(new FileReader(myDir + "/" + filename));
-            sendMessageToMainActivity("Reading data...");
+            sendMessageToMainActivity("Reading file...");
 
             while (true) {
                 try {
@@ -194,7 +194,7 @@ class ConnectedThread extends Thread {
         File file = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOCUMENTS), "iShadow Received Data");
         if (!file.mkdirs()) {
-            sendMessageToMainActivity("Directory not created");
+//            sendMessageToMainActivity("Directory not created");
         }
         return file;
     }
