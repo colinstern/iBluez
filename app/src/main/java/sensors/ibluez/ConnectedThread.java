@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * This class handles the connection with iShadow and receives and saves data.
@@ -27,6 +28,8 @@ class ConnectedThread extends Thread {
     private final Handler mHandler;
     FileOutputStream outputStream;
     Context context;
+    /** Temporary way to hold the text read from a packet */
+    public String writeString = "";
 
     public ConnectedThread(FallbackBluetoothSocket socket, Handler handler) {
         mHandler = handler;
@@ -78,14 +81,23 @@ class ConnectedThread extends Thread {
             while (true) {
                 try {
                     // Read from the InputStream
-                    sendMessageToMainActivity("Preparing to read data");
+                    sendMessageToMainActivity("Ready to read data");
                     bytes = mmInStream.read(buffer);
-                    sendMessageToMainActivity("Data read");
+//                    sendMessageToMainActivity("Data read");
                     // Send the obtained bytes to the UI activity
                     mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
-                    outputStream.write(buffer);
-                    sendMessageToMainActivity("Read 1024 bytes");
+                    sendMessageToMainActivity("Read " + bytes + " bytes");
+                    if (parse(buffer)) {
+                        /* Data matches the hash, so we write it */
+                        outputStream.write(writeString.getBytes());
+                        write("O".getBytes()); //OK
+                        sendMessageToMainActivity("Packet successfully received");
+                    } else {
+                        /* Data is (probably) corrupted, so we ask for it to be resent */
+                        sendMessageToMainActivity("Asking for retransmit of packet");
+                        write("R".getBytes()); //RETRANSMIT
+                    }
                 } catch (IOException e) {
 //                sendMessageToMainActivity("Unable to read from inputStream!");
                 sendMessageToMainActivity("Connection terminated.");
@@ -140,9 +152,51 @@ class ConnectedThread extends Thread {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-//                e.printStackTrace();
         }
+    }
+
+    /**
+     * Checks if the packet was correctly transmitted.
+     * @param buffer The byte array just read, aka the "packet".
+     * @return Whether the hash of the data matches the hash in the packet header.
+     */
+    private boolean parse(byte[] buffer) {
+        String bufString = "empty";
+        try {
+            bufString = new String(buffer, "UTF-8");
+        } catch (UnsupportedEncodingException e){
+            sendMessageToMainActivity(e.toString());
+        }
+
+        String[] tokens = bufString.split("\\|"); //pipe is escaped because it is a regex
+        for (String t: tokens)
+            sendMessageToMainActivity("Tokens: " + t);
+
+        if (tokens.length > 3) {
+            sendMessageToMainActivity("New hash: " + new Integer(hash(tokens[3]+"|")).toString() + " Original hash: " + tokens[2]);
+
+            if (Integer.parseInt(tokens[2]) == hash(tokens[3]+"|")) { //the pipe is used for hash calculation on the microcontroller
+                writeString = tokens[3];
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false; //the packet was misformed and we couldn't even find the header so we need it to be resent
+        }
+    }
+
+    /**
+     * Makes a hash of the input string by adding up the ASCII values of its characters.
+     * @param data The input string.
+     * @return The hash.
+     */
+    private int hash(String data) {
+        char[] chars = data.toCharArray();
+        int result = 0;
+        for (char c: chars)
+            result += (int) c;
+        return result;
     }
 
     /* Call this from the main activity to send data to the remote device */

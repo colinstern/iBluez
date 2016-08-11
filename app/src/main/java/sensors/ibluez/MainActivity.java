@@ -87,7 +87,6 @@ public class MainActivity extends Activity {
                         return true;
                     case R.id.action_connect:
                         if (openContextMenuOnce) {
-                            sendMessage("Opening Connect menu...\n");
                             openContextMenuOnce = !openContextMenuOnce;
                             // Launch the DeviceListActivity to see devices and do scan
                             Intent serverIntent = new Intent(MyApplication.getAppContext(), DeviceListActivity.class);
