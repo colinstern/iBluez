@@ -82,14 +82,30 @@ class ConnectedThread extends Thread {
                 try {
                     // Read from the InputStream
                     sendMessageToMainActivity("Ready to read data");
+
                     /** Clean out buffer */
                     buffer = new byte[1024];
                     bytes = mmInStream.read(buffer);
+
+                    /** Keep filling the buffer until it finds the stop character */
+                    while (!(new String(buffer, "UTF-8").contains("$"))) {
+                        byte [] append = new byte[1024];
+                        bytes = mmInStream.read(append);
+
+                        byte[] combined = new byte[buffer.length + append.length];
+
+                        System.arraycopy(buffer,0,combined,0         ,buffer.length);
+                        System.arraycopy(append,0,combined,buffer.length,append.length);
+
+                        buffer = combined;
+                    }
+
 //                    sendMessageToMainActivity("Data read");
                     // Send the obtained bytes to the UI activity
                     mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
                     sendMessageToMainActivity("Read " + bytes + " bytes");
+                    
                     if (parse(buffer)) {
                         /* Data matches the hash, so we write it */
                         outputStream.write(writeString.getBytes());
@@ -178,11 +194,15 @@ class ConnectedThread extends Thread {
             int newHash = hash(tokens[3]+"|");
             sendMessageToMainActivity("New hash: " + new Integer(newHash).toString() + " Original hash: " + tokens[2]);
 
-            if (Integer.parseInt(tokens[2]) == newHash) {
-                writeString = tokens[3];
-//                writeString = writeString.replace('$', Character.MIN_VALUE); //remove the $
-                return true;
-            } else {
+            try {
+                if (Integer.parseInt(tokens[2]) == newHash) {
+                    writeString = tokens[3];
+                writeString = writeString.replace('$', Character.MIN_VALUE); //remove the $
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
                 return false;
             }
         } else {
