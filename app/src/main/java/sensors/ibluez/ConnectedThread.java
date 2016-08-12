@@ -82,6 +82,8 @@ class ConnectedThread extends Thread {
                 try {
                     // Read from the InputStream
                     sendMessageToMainActivity("Ready to read data");
+                    /** Clean out buffer */
+                    buffer = new byte[1024];
                     bytes = mmInStream.read(buffer);
 //                    sendMessageToMainActivity("Data read");
                     // Send the obtained bytes to the UI activity
@@ -161,7 +163,7 @@ class ConnectedThread extends Thread {
      * @return Whether the hash of the data matches the hash in the packet header.
      */
     private boolean parse(byte[] buffer) {
-        String bufString = "empty";
+        String bufString = "";
         try {
             bufString = new String(buffer, "UTF-8");
         } catch (UnsupportedEncodingException e){
@@ -169,14 +171,16 @@ class ConnectedThread extends Thread {
         }
 
         String[] tokens = bufString.split("\\|"); //pipe is escaped because it is a regex
-        for (String t: tokens)
-            sendMessageToMainActivity("Tokens: " + t);
 
         if (tokens.length > 3) {
-            sendMessageToMainActivity("New hash: " + new Integer(hash(tokens[3]+"|")).toString() + " Original hash: " + tokens[2]);
+            sendMessageToMainActivity("Packet: " + tokens[1]);
+            /** The pipe is included because it is used for hash calculation on the microcontroller */
+            int newHash = hash(tokens[3]+"|");
+            sendMessageToMainActivity("New hash: " + new Integer(newHash).toString() + " Original hash: " + tokens[2]);
 
-            if (Integer.parseInt(tokens[2]) == hash(tokens[3]+"|")) { //the pipe is used for hash calculation on the microcontroller
+            if (Integer.parseInt(tokens[2]) == newHash) {
                 writeString = tokens[3];
+//                writeString = writeString.replace('$', Character.MIN_VALUE); //remove the $
                 return true;
             } else {
                 return false;

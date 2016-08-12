@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()){
                     case R.id.action_disconnect:
-                        sendMessage("Disconnecting...\n");
+                        sendMessage("\nDisconnecting...\n");
                         if (mmConnectThread != null) {
                             mmConnectThread.cancel();
                         }
