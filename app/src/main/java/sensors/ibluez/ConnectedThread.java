@@ -105,7 +105,7 @@ class ConnectedThread extends Thread {
                     mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
                     sendMessageToMainActivity("Read " + bytes + " bytes");
-                    
+
                     if (parse(buffer)) {
                         /* Data matches the hash, so we write it */
                         outputStream.write(writeString.getBytes());
