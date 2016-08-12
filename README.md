@@ -14,6 +14,8 @@ There is a one second delay on the microcontroller after it receives acknowledge
 
 The hash is a sum of the ASCII values of each character. This is an admittedly bad hash, but can easily be fixed by changing the contents of the hash function on both the microcontroller and android.
 
+Data is sent in packets of 256 bytes, not including the header and separator characters. As the number of the packet increases and the hash changes between packets, the total bytes per packet is usually 266 or 267 bytes.
+
 The android uses '|' (pipe) as start and separator characters and '$' (dollar sign) as end-of-packet character. This could lead to problems if these characters are transmitted in the data. To change the separator and stop characters to something unlikely to show up in data will depend on the data being sent. Changing these characters to be a series of characters, e.g. '||' or '$$$' might work just as well.
 
 Data is stored in a new file on the iShadow Received Data directory in the Documents folder of the android external memory every time the app is restarted. Old files may need to be cleaned out every once in a while.
@@ -24,6 +26,6 @@ The button marked with a bluetooth symbol makes the android discoverable.
 
 The name "Mascara" is a ploy on "iShadow" (eye shadow).
 
+#Known Bugs
 
-
-
+The first packet received by the app may be duplicated. This is easy to resolve in the output file by deleting the first 256 bytes.
