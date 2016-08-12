@@ -35,11 +35,7 @@ public class MainActivity extends Activity {
 
     private ConnectThread mmConnectThread;
 
-    private BluetoothDevice imFeelingLuckyDevice; //total guess - is the first device the microcontroller?
-
     private String mConnectedDeviceName;
-
-    private boolean mDisconnectShown;
 
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -88,7 +84,8 @@ public class MainActivity extends Activity {
                     case R.id.action_connect:
                         if (openContextMenuOnce) {
                             openContextMenuOnce = !openContextMenuOnce;
-                            // Launch the DeviceListActivity to see devices and do scan
+
+                            /* Launch the DeviceListActivity to see devices and do scan */
                             Intent serverIntent = new Intent(MyApplication.getAppContext(), DeviceListActivity.class);
                             startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
                         }
@@ -124,9 +121,11 @@ public class MainActivity extends Activity {
          * Register the BroadcastReceiver
          */
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
+        registerReceiver(mReceiver, filter);
 
-        // Register for broadcasts when discovery has finished
+        /** Register for broadcasts when discovery has finished
+         *
+         */
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         this.registerReceiver(mReceiver, filter);
     }
@@ -200,7 +199,6 @@ public class MainActivity extends Activity {
         // Attempt to connect to the device
 
         mmConnectThread = new ConnectThread(device, mHandler);
-//        sendMessage("Starting ConnectThread\n");
         mmConnectThread.start();
     }
 
@@ -251,7 +249,7 @@ public class MainActivity extends Activity {
 
     /**
      * Write a message on the TextView.
-     * @param message
+     * @param message The text to be displayed.
      */
     public void sendMessage(String message) {
         final TextView textview = (TextView) findViewById(R.id.textview_new);

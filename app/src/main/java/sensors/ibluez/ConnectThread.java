@@ -34,8 +34,7 @@ class ConnectThread extends Thread {
     public FallbackBluetoothSocket fallbackSocket;
 
     public ConnectThread(BluetoothDevice device, Handler handler) {
-        // Use a temporary object that is later assigned to mmSocket,
-        // because mmSocket is final
+        /** Use a temporary object that is later assigned to mmSocket,because mmSocket is final */
         mHandler = handler;
         BluetoothSocket tmp = null;
         mmDevice = device;
@@ -47,11 +46,10 @@ class ConnectThread extends Thread {
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
-        // Get a BluetoothSocket to connect with the given BluetoothDevice
+        /** Get a BluetoothSocket to connect with the given BluetoothDevice */
         try {
-            // MY_UUID is the app's UUID string, also used by the server code
+            /** MY_UUID is the app's UUID string, also used by the server code */
             tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-//            sendMessageToMainActivity("Opening socket");
         } catch (IOException e) {
             sendErrorMessageToMainActivity("Could not get a socket\n");
         }
@@ -59,26 +57,23 @@ class ConnectThread extends Thread {
     }
 
     public void run() {
-//        sendMessageToMainActivity("\nRunning ConnectThread...\n");
-        // Cancel discovery because it will slow down the connection
+        /** Cancel discovery because it will slow down the connection */
         mBluetoothAdapter.cancelDiscovery();
         try {
-            // Connect the device through the socket. This will block
-            // until it succeeds or throws an exception
+            /** Connect the device through the socket. This will block until it succeeds or throws an exception */
             mmSocket.connect();
         } catch (IOException connectException) {
-//            sendErrorMessageToMainActivity("Error: " + connectException.toString());
-            // Unable to connect; close the socket and get out
-//            sendMessageToMainActivity("Unable to connect");
+            /** Due to some methods in the BluetoothScoket class being private, we need to work
+             * around this with reflections.
+             */
 
             try {
                 mmSocket.close();
-//                sendMessageToMainActivity("Closing socket");
                 fallbackSocket = new FallbackBluetoothSocket(mmSocket);
                 sendMessageToMainActivity("Opening new socket...");
                 fallbackSocket.connect();
                 sendMessageToMainActivity("Connection successful!");
-                // Do work to manage the connection (in a separate thread)
+                /** Do work to manage the connection (in a separate thread) */
                 manageConnectedSocket(fallbackSocket);
             } catch (IOException closeException) {
                 sendErrorMessageToMainActivity("Unable to open socket: Is iShadow on?");
@@ -90,7 +85,6 @@ class ConnectThread extends Thread {
     public void manageConnectedSocket(FallbackBluetoothSocket mmSocket)
     {
         mConnectedThread = new ConnectedThread(mmSocket, mHandler);
-//        sendMessageToMainActivity("Starting ConnectedThread...");
         mConnectedThread.start();
     }
 
@@ -103,28 +97,33 @@ class ConnectThread extends Thread {
     }
 
     public void sendMessageToMainActivity(String message) {
-        byte[] buffer;  // buffer store for the stream
+        /** Buffer store for the stream */
+        byte[] buffer;
         int bytes;
-        // Read from the InputStream
+        /** Read from the InputStream */
         bytes = message.getBytes().length;
         buffer = message.getBytes();
-        // Send the obtained bytes to the UI activity
+        /** Send the obtained bytes to the UI activity */
         mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
                 .sendToTarget();
     }
 
     public void sendErrorMessageToMainActivity(String message) {
-        byte[] buffer;  // buffer store for the stream
+        /** Buffer store for the stream */
+        byte[] buffer;
         int bytes;
-        // Read from the InputStream
+        /** Read from the InputStream */
         bytes = message.getBytes().length;
         buffer = message.getBytes();
-        // Send the obtained bytes to the UI activity
+        /** Send the obtained bytes to the UI activity */
         mHandler.obtainMessage(Constants.MESSAGE_ERROR, bytes, -1, buffer)
                 .sendToTarget();
     }
 }
 
+/**
+ * A workaround of private methods in the BluetoothSocket class using reflections so we can connect.
+ */
  class FallbackBluetoothSocket {
 
     private BluetoothSocket fallbackSocket;

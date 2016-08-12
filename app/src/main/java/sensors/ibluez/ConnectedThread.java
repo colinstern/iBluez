@@ -37,8 +37,7 @@ class ConnectedThread extends Thread {
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
 
-        // Get the input and output streams, using temp objects because
-        // member streams are final
+        /** Get the input and output streams, using temp objects because member streams are final */
         try {
             tmpIn = socket.getInputStream();
             tmpOut = socket.getOutputStream();
@@ -51,9 +50,12 @@ class ConnectedThread extends Thread {
     }
 
     public void run() {
-//        sendMessageToMainActivity("Running ConnectedThread");
-        byte[] buffer = new byte[1024];  // buffer store for the stream
-        int bytes; // bytes returned from read()
+        /** buffer store for the stream */
+        byte[] buffer = new byte[1024];
+
+        /** bytes returned from read() */
+        int bytes;
+
         if (!isExternalStorageWritable()) {
             sendMessageToMainActivity("External storage is not writable!");
         }
@@ -117,7 +119,6 @@ class ConnectedThread extends Thread {
                         write("R".getBytes()); //RETRANSMIT
                     }
                 } catch (IOException e) {
-//                sendMessageToMainActivity("Unable to read from inputStream!");
                 sendMessageToMainActivity("Connection terminated.");
                     break;
                 }
@@ -149,10 +150,6 @@ class ConnectedThread extends Thread {
         try {
             File myDir = new File(dir.getAbsolutePath());
             String s = "";
-
-//                FileWriter fw = new FileWriter(myDir + "/Test.txt");
-//                fw.write("Hello World");
-//                fw.close();
 
             BufferedReader br = new BufferedReader(new FileReader(myDir + "/" + filename));
             sendMessageToMainActivity("Reading file...");

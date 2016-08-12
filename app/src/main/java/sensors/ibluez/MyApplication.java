@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 /**
+ * Allows the setting and getting of context.
  * Created by cost on 8/5/16.
  */
 public class MyApplication extends Application {
